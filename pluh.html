@@ -99,8 +99,7 @@
         cartItemDiv.className = 'cart-item';
         cartItemDiv.innerHTML = `
           ${item.name} - ${item.price} Kr 
-          <button class="remove-btn" onclick="removeFromCart(${index})">Fjern</button>
-        `;
+          <button class="remove-btn" onclick="removeFromCart(${index})">Fjern</button>`;
         cartItemsDiv.appendChild(cartItemDiv);
         totalPrice += item.price;
       });
