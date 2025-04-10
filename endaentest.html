@@ -6,41 +6,61 @@
     <title>Offline Bank</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Ny skrifttype */
             margin: 0;
-            padding: 0;
+            padding: 20px; /* Litt padding rundt hele siden */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            background-color: #f4f4f4;
+            min-height: 100vh; /* Bruker minste høyde for å sikre sentrering */
+            background-color: #e9ecef; /* Litt lysere bakgrunn */
         }
         .container {
-            width: 300px;
-            padding: 20px;
+            width: 350px; /* Litt bredere container */
+            padding: 30px; /* Mer padding inni containeren */
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px; /* Mer avrundede hjørner */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Mykere skygge */
+        }
+        h2 {
+            color: #343a40; /* Mørkere overskrifter */
+            margin-bottom: 20px;
+            text-align: center;
         }
         input, button {
             width: 100%;
-            padding: 10px;
+            padding: 12px; /* Litt mer padding i input og knapp */
             margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #ced4da; /* Lysere border */
+            border-radius: 6px; /* Litt mer avrundede hjørner */
+            box-sizing: border-box; /* Sikrer at padding ikke øker bredden */
+        }
+        input:focus {
+            border-color: #007bff; /* Fremhev border når aktiv */
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Lett skygge ved fokus */
+            outline: none; /* Fjern standard fokus-outline */
         }
         button {
-            background-color: #007BFF;
+            background-color: #007bff;
             color: white;
             border: none;
             cursor: pointer;
+            transition: background-color 0.2s ease-in-out; /* Myk overgang ved hover */
         }
         button:hover {
             background-color: #0056b3;
         }
         .hidden {
             display: none;
+        }
+        #balance-display {
+            font-weight: bold;
+            color: #28a745; /* Grønn farge for saldo */
+        }
+        #user-display {
+            font-weight: bold;
+            color: #007bff; /* Blå farge for brukernavn */
         }
     </style>
 </head>
@@ -73,6 +93,31 @@
             <button onclick="logout()">Logg ut</button>
         </div>
     </div>
+    <body>
+        <div class="container">
+            <div id="register-section">
+                <h1>Registrer deg</h1>
+                <input type="text" id="register-username" placeholder="Brukernavn" required>
+                <input type="password" id="register-password" placeholder="Passord" required>
+                <button onclick="register()">Registrer</button>
+            </div>
+    
+            <div id="login-section" class="hidden">
+                <h1>Logg inn</h1>
+                <input type="text" id="login-username" placeholder="Brukernavn" required>
+                <input type="password" id="login-password" placeholder="Passord" required>
+                <button onclick="login()">Logg inn</button>
+            </div>
+    
+            <div id="bank-section" class="hidden">
+                <h1>Velkommen, <span id="user-display"></span></h1>
+                <p>Saldo: <span id="balance-display">0</span> kr</p>
+                <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
+                <button onclick="deposit()">Sett inn</button>
+                <button onclick="logout()">Logg ut</button>
+                <button onclick="switchUser()">Bytt bruker</button>
+            </div>
+        </div>
 
     <script>
         // Registrer en ny bruker
