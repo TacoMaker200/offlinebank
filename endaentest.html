@@ -65,41 +65,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Registreringsseksjon -->
-        <div id="register-section" class="hidden">
-            <!-- Seksjon for å registrere en ny bruker -->
-            <h2>Registrer deg</h2>
-            <input type="text" id="register-account-number" placeholder="Kontonummer (11 sifre)" required>
-            <input type="password" id="register-password" placeholder="Passord" required>
-            <button onclick="register()">Registrer</button>
-            <button onclick="showSection('login-section')">Har du allerede en konto? Logg inn</button>
-        </div>
-
-        <!-- Innloggingsseksjon -->
-        <div id="login-section">
-            <!-- Seksjon for å logge inn som en eksisterende bruker -->
-            <h2>Logg inn</h2>
-            <input type="text" id="login-account-number" placeholder="Kontonummer (11 sifre)" required>
-            <input type="password" id="login-password" placeholder="Passord" required>
-            <button onclick="login()">Logg inn</button>
-            <button onclick="showSection('register-section')">Har du ikke en konto? Registrer deg</button>
-        </div>
-
-        <!-- Bankseksjon -->
-        <div id="bank-section" class="hidden">
-            <!-- Seksjon for bankfunksjonalitet -->
-            <h2>Velkommen, <span id="user-display"></span></h2>
-            <p>Saldo: <span id="balance-display">0</span> kr</p>
-            <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
-            <button onclick="deposit()">Sett inn</button>
-            <button onclick="logout()">Logg ut</button>
-            <!-- Ny knapp for å bytte bruker -->
-            <button onclick="switchUser()">Bytt bruker</button>
-        </div>
-    </div>
-    <body>
-        <div class="container">
+          <div class="container">
             <div id="register-section">
                 <h1>Registrer deg</h1>
                 <input type="text" id="register-username" placeholder="Brukernavn" required>
