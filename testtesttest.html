@@ -96,6 +96,13 @@
             <p>Saldo: <span id="balance-display">0</span> kr</p>
             <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
             <button onclick="deposit()">Sett inn</button>
+            <button onclick="showWithdrawSection()">Ta ut penger</button>
+            <div id="withdraw-section" class="hidden">
+                <h3>Ta ut penger</h3>
+                <input type="number" id="withdraw-amount" placeholder="Beløp å ta ut">
+                <button onclick="withdraw()">Ta ut</button>
+                <button onclick="showSection('bank-section')">Tilbake</button>
+            </div>
             <button onclick="logout()">Logg ut</button>
         </div>
     </div>
@@ -177,7 +184,9 @@
 
             const accountNumber = localStorage.getItem("currentUser");
             const users = JSON.parse(localStorage.getItem("users"));
-            users[accountNumber].balance += amount;
+            const user = users[accountNumber];
+
+            user.balance += amount;
             localStorage.setItem("users", JSON.stringify(users));
             updateBankUI();
             alert(`Du har satt inn ${amount} kr.`);
@@ -197,6 +206,39 @@
             document.getElementById(sectionId).classList.remove("hidden");
         }
 
+        function showWithdrawSection() {
+            document.getElementById('withdraw-section').classList.remove('hidden');
+            document.getElementById('deposit-amount').classList.add('hidden');
+            // Fjern eventuelt de linjene som skjuler andre elementer hvis du vil ha dem synlige
+        }
+        // Ta ut penger fra kontoen
+        function withdraw() {
+            const amount = parseFloat(document.getElementById("withdraw-amount").value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("Vennligst skriv inn et gyldig beløp.");
+                return;
+            }
+
+            const accountNumber = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            const user = users[accountNumber];
+
+            if (amount > user.balance) {
+                alert("Du har ikke nok penger på kontoen din.");
+                return;
+            }
+
+            user.balance -= amount;
+            localStorage.setItem("users", JSON.stringify(users));
+            updateBankUI();
+            alert(`Du har tatt ut ${amount} kr.`);
+            document.getElementById("withdraw-amount").value = ""; // Tøm inputfeltet etter uttak
+            document.getElementById('withdraw-section').classList.add('hidden'); // Skjuler uttaksdelen etterpå
+            document.getElementById('deposit-amount').classList.remove('hidden'); // Viser innskuddsfeltet igjen
+            // Vis eventuelt de andre skjulte elementene igjen her
+        }
+
         // Sjekk om en bruker allerede er logget inn
         window.onload = () => {
             const currentUser = localStorage.getItem("currentUser");
@@ -207,6 +249,7 @@
                 showSection("register-section");
             }
         };
+
     </script>
 </body>
 </html>
