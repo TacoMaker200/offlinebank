@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <title>Offline Bank med Betaling</title>
+    <style>
+        /* Kombinert styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #e9ecef;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h2, h1 {
+            color: #343a40;
+            text-align: center;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #balance-display {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        #user-display {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .product, .cart-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .product {
+            background-color: #f9f9f9;
+        }
+
+        .cart-item {
+            background-color: #eef;
+        }
+
+        .remove-btn {
+            background-color: #e74c3c;
+            border-radius: 4px;
+            padding: 5px 10px;
+            color: white;
+            border: none;
+        }
+
+        .remove-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .two-col {
+            display: flex;
+            gap: 10px;
+        }
+
+        .two-col input {
+            width: 100%;
+        }
+
+        .total {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            font-weight: bold;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="register-section">
+            <h2>Registrer deg</h2>
+            <input type="text" id="register-username" placeholder="Brukernavn" required>
+            <input type="text" id="register-account-number" placeholder="Kontonummer (11 sifre)" maxlength="11" required>
+            <input type="password" id="register-password" placeholder="Passord" required>
+            <button onclick="register()">Registrer</button>
+            <button onclick="showSection('login-section')">Har du allerede en konto? Logg inn</button>
+        </div>
+
+        <div id="login-section" class="hidden">
+            <h2>Logg inn</h2>
+            <input type="text" id="login-account-number" placeholder="Kontonummer (11 sifre)" maxlength="11" required>
+            <input type="password" id="login-password" placeholder="Passord" required>
+            <button onclick="login()">Logg inn</button>
+            <button onclick="showSection('register-section')">Har du ikke en konto? Registrer deg</button>
+        </div>
+
+        <div id="bank-section" class="hidden">
+            <h2>Velkommen, <span id="user-display"></span></h2>
+            <p>Saldo: <span id="balance-display">0</span> kr</p>
+            <input type="number" id="transaction-amount" placeholder="Beløp">
+            <button onclick="deposit()">Sett inn</button>
+            <button onclick="withdraw()">Ta ut</button>
+            <button onclick="logout()">Logg ut</button>
+
+            <hr>
+
+            <h2>Overfør penger</h2>
+            <div class="product">
+                <input type="number" id="Mottaker" placeholder="Mottaker (11 sifre)">
+                <input type="number" id="Penger" placeholder="Beløp">
+                <button onclick="addToCart()">Betal</button>
+            </div>
+
+            <div class="cart">
+                <h3>Transaksjonslogg</h3>
+                <button onclick="clearLog()">Fjern logg</button>
+                <div id="cart-items"></div>
+                <div class="total">
+                    <strong>Total sum: </strong><span id="total-price">0</span> Kr
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Lagring av brukere og innlogging
+        function register() {
+            const username = document.getElementById("register-username").value;
+            const accountNumber = document.getElementById("register-account-number").value;
+            const password = document.getElementById("register-password").value;
+
+            if (!username || !accountNumber || !password) {
+                alert("Vennligst fyll ut alle felt.");
+                return;
+            }
+
+            if (!/^\d{11}$/.test(accountNumber)) {
+                alert("Kontonummer må være 11 sifre.");
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem("users")) || {};
+            if (users[accountNumber]) {
+                alert("Kontonummeret er allerede registrert.");
+                return;
+            }
+
+            users[accountNumber] = { username, password, balance: 0, log: [] }; // Legger til en tom logg for ny bruker
+            localStorage.setItem("users", JSON.stringify(users));
+            alert("Registrering vellykket!");
+            showSection("login-section");
+        }
+
+        function login() {
+            const accountNumber = document.getElementById("login-account-number").value;
+            const password = document.getElementById("login-password").value;
+
+            const users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (!users[accountNumber] || users[accountNumber].password !== password) {
+                alert("Feil kontonummer eller passord.");
+                return;
+            }
+
+            localStorage.setItem("currentUser", accountNumber);
+            showSection("bank-section");
+            updateBankUI();
+        }
+
+        function updateBankUI() {
+            const accountNumber = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            const user = users[accountNumber];
+            document.getElementById("user-display").textContent = user.username;
+            document.getElementById("balance-display").textContent = user.balance;
+            updateLog(); // Oppdaterer transaksjonsloggen når brukergrensesnittet oppdateres
+        }
+
+        function deposit() {
+            const amount = parseFloat(document.getElementById("transaction-amount").value);
+            if (isNaN(amount) || amount <= 0) return alert("Ugyldig beløp");
+
+            const accountNumber = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            users[accountNumber].balance += amount;
+
+            const dato = formatDate(new Date());
+            users[accountNumber].log.push({ type: 'Innskudd', amount: amount, date: dato }); // Legger til innskudd i loggen
+
+            localStorage.setItem("users", JSON.stringify(users));
+            updateBankUI();
+            alert(`Du har satt inn ${amount} kr.`);
+            document.getElementById("transaction-amount").value = "";
+        }
+
+        function withdraw() {
+            const amount = parseFloat(document.getElementById("transaction-amount").value);
+            const accountNumber = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            const user = users[accountNumber];
+
+            if (isNaN(amount) || amount <= 0 || amount > user.balance) {
+                alert("Ugyldig beløp eller ikke nok saldo.");
+                return;
+            }
+
+            user.balance -= amount;
+
+            const dato = formatDate(new Date());
+            user.log.push({ type: 'Uttak', amount: -amount, date: dato }); // Legger til uttak i loggen med negativt beløp
+
+            localStorage.setItem("users", JSON.stringify(users));
+            updateBankUI();
+            alert(`Du har tatt ut ${amount} kr.`);
+            document.getElementById("transaction-amount").value = "";
+        }
+
+        function logout() {
+            localStorage.removeItem("currentUser");
+            showSection("login-section");
+        }
+
+        function showSection(id) {
+            document.querySelectorAll(".container > div").forEach(div => div.classList.add("hidden"));
+            document.getElementById(id).classList.remove("hidden");
+        }
+
+        // Betaling / transaksjon logg
+        function updateLog() {
+            const logItemsDiv = document.getElementById('cart-items');
+            const totalPriceDiv = document.getElementById('total-price'); // Hent totalpris-diven igjen
+            logItemsDiv.innerHTML = '';
+            let totalCost = 0; // Variabel for å holde summen
+
+            const accountNumber = localStorage.getItem('currentUser');
+            const users = JSON.parse(localStorage.getItem("users"));
+            const log = users[accountNumber].log; // Henter brukerens spesifikke logg
+
+            log.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `${item.type}: ${item.amount} kr (Dato: ${item.date})`;
+                logItemsDiv.appendChild(div);
+                totalCost += item.amount; // Legg til beløpet til totalsummen
+            });
+
+            // Vis total kostnad
+            if (totalPriceDiv) {
+                totalPriceDiv.style.display = 'block'; // Vis totalpris-diven
+                totalPriceDiv.textContent = totalCost + ' Kr';
+            }
+        }
+
+        function formatDate(date) {
+            const d = date;
+            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        function addToCart() {
+            const mottaker = document.getElementById('Mottaker').value;
+            const penger = parseFloat(document.getElementById('Penger').value);
+            const sender = localStorage.getItem('currentUser');
+            const users = JSON.parse(localStorage.getItem("users"));
+
+            if (!/^\d{11}$/.test(mottaker) || isNaN(penger) || penger <= 0) {
+                return alert("Ugyldig mottaker eller beløp.");
+            }
+
+            if (!users[mottaker]) {
+                return alert("Mottakeren finnes ikke.");
+            }
+
+            if (users[sender].balance < penger) {
+                return alert("Ikke nok saldo.");
+            }
+
+            // Overfør penger
+            users[sender].balance -= penger;
+            users[mottaker].balance += penger;
+
+            const dato = formatDate(new Date());
+            users[sender].log.push({ type: `Betalt til ${mottaker}`, amount: -penger, date: dato }); // Legger til betaling i senders logg med negativt beløp
+            users[mottaker].log.push({ type: `Mottatt fra ${sender}`, amount: penger, date: dato }); // Legger til mottak i mottakers logg
+
+            localStorage.setItem("users", JSON.stringify(users));
+
+            updateBankUI();
+            alert(`Overført ${penger} kr til ${mottaker}.`);
+            document.getElementById('Mottaker').value = '';
+            document.getElementById('Penger').value = '';
+        }
+
+        function clearLog() {
+            const accountNumber = localStorage.getItem('currentUser');
+            const users = JSON.parse(localStorage.getItem("users"));
+            if (users[accountNumber] && confirm("Er du sikker på at du vil fjerne hele transaksjonsloggen?")) {
+                users[accountNumber].log = [];
+                localStorage.setItem("users", JSON.stringify(users));
+                updateLog();
+                alert("Transaksjonsloggen er fjernet.");
+            }
+        }
+
+        window.onload = () => {
+            const currentUser = localStorage.getItem("currentUser");
+            if (currentUser) {
+                showSection("bank-section");
+                updateBankUI();
+            } else {
+                showSection("register-section");
+            }
+        };
+    </script>
+</body>
+</html>
