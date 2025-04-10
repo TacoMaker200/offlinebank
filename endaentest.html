@@ -48,6 +48,7 @@
     <div class="container">
         <!-- Registreringsseksjon -->
         <div id="register-section" class="hidden">
+            <!-- Seksjon for å registrere en ny bruker -->
             <h2>Registrer deg</h2>
             <input type="text" id="register-account-number" placeholder="Kontonummer (11 sifre)" required>
             <input type="password" id="register-password" placeholder="Passord" required>
@@ -57,6 +58,7 @@
 
         <!-- Innloggingsseksjon -->
         <div id="login-section">
+            <!-- Seksjon for å logge inn som en eksisterende bruker -->
             <h2>Logg inn</h2>
             <input type="text" id="login-account-number" placeholder="Kontonummer (11 sifre)" required>
             <input type="password" id="login-password" placeholder="Passord" required>
@@ -66,37 +68,46 @@
 
         <!-- Bankseksjon -->
         <div id="bank-section" class="hidden">
+            <!-- Seksjon for bankfunksjonalitet -->
             <h2>Velkommen, <span id="user-display"></span></h2>
             <p>Saldo: <span id="balance-display">0</span> kr</p>
             <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
             <button onclick="deposit()">Sett inn</button>
             <button onclick="logout()">Logg ut</button>
+            <!-- Ny knapp for å bytte bruker -->
+            <button onclick="switchUser()">Bytt bruker</button>
         </div>
     </div>
 
     <script>
         // Registrer en ny bruker
         function register() {
+            // Henter kontonummer og passord fra inputfeltene
             const accountNumber = document.getElementById("register-account-number").value;
             const password = document.getElementById("register-password").value;
 
+            // Validerer at feltene ikke er tomme
             if (!accountNumber || !password) {
                 alert("Vennligst fyll ut alle felt.");
                 return;
             }
 
+            // Validerer at kontonummeret er 11 sifre
             if (!/^\d{11}$/.test(accountNumber)) {
                 alert("Kontonummer må være nøyaktig 11 sifre.");
                 return;
             }
 
+            // Henter eksisterende brukere fra localStorage
             const users = JSON.parse(localStorage.getItem("users")) || {};
 
+            // Sjekker om kontonummeret allerede er registrert
             if (users[accountNumber]) {
                 alert("Kontonummeret er allerede registrert.");
                 return;
             }
 
+            // Lagrer ny bruker i localStorage
             users[accountNumber] = { password: password, balance: 0 };
             localStorage.setItem("users", JSON.stringify(users));
             alert("Registrering vellykket! Du kan nå logge inn.");
@@ -105,40 +116,47 @@
 
         // Logg inn en eksisterende bruker
         function login() {
+            // Henter kontonummer og passord fra inputfeltene
             const accountNumber = document.getElementById("login-account-number").value;
             const password = document.getElementById("login-password").value;
 
+            // Henter brukere fra localStorage
             const users = JSON.parse(localStorage.getItem("users")) || {};
 
+            // Validerer innloggingsinformasjonen
             if (!users[accountNumber] || users[accountNumber].password !== password) {
                 alert("Ugyldig kontonummer eller passord.");
                 return;
             }
 
+            // Lagrer innlogget bruker i localStorage
             localStorage.setItem("currentUser", accountNumber);
             showSection("bank-section");
             updateBankUI();
         }
 
-        // Oppdater bankgrensesnittet
+        // Oppdaterer bankgrensesnittet med brukerens data
         function updateBankUI() {
             const accountNumber = localStorage.getItem("currentUser");
             const users = JSON.parse(localStorage.getItem("users"));
             const user = users[accountNumber];
 
+            // Viser kontonummer og saldo
             document.getElementById("user-display").textContent = accountNumber;
             document.getElementById("balance-display").textContent = user.balance;
         }
 
-        // Sett inn penger
+        // Sett inn penger på kontoen
         function deposit() {
             const amount = parseFloat(document.getElementById("deposit-amount").value);
 
+            // Validerer beløpet
             if (isNaN(amount) || amount <= 0) {
                 alert("Vennligst skriv inn et gyldig beløp.");
                 return;
             }
 
+            // Oppdaterer saldoen til brukeren
             const accountNumber = localStorage.getItem("currentUser");
             const users = JSON.parse(localStorage.getItem("users"));
             users[accountNumber].balance += amount;
@@ -149,11 +167,20 @@
 
         // Logg ut brukeren
         function logout() {
+            // Fjerner innlogget bruker fra localStorage
             localStorage.removeItem("currentUser");
             showSection("login-section");
         }
 
-        // Funksjon for å bytte seksjoner
+        // Bytt bruker (logg ut og gå til innloggingsseksjonen)
+        function switchUser() {
+            // Fjerner innlogget bruker fra localStorage
+            localStorage.removeItem("currentUser");
+            alert("Du har logget ut. Du kan nå logge inn med en annen bruker eller registrere en ny.");
+            showSection("login-section");
+        }
+
+        // Bytter mellom seksjoner
         function showSection(sectionId) {
             document.querySelectorAll(".container > div").forEach(section => {
                 section.classList.add("hidden");
@@ -161,7 +188,7 @@
             document.getElementById(sectionId).classList.remove("hidden");
         }
 
-        // Sjekk om en bruker allerede er logget inn
+        // Sjekker om en bruker allerede er logget inn når siden lastes
         window.onload = () => {
             const currentUser = localStorage.getItem("currentUser");
             if (currentUser) {
