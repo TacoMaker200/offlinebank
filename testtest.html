@@ -6,50 +6,47 @@
     <title>Offline Bank</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Moderne skrifttype */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Ny skrifttype */
             margin: 0;
-            padding: 20px;
+            padding: 20px; /* Litt padding rundt hele siden */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh; /* Sikrer at innholdet er sentrert selv om det er lite */
-            background-color: #f0f2f5; /* Litt mykere bakgrunnsfarge */
+            min-height: 100vh; /* Bruker minste høyde for å sikre sentrering */
+            background-color: #e9ecef; /* Litt lysere bakgrunn */
         }
         .container {
-            width: 350px; /* Litt bredere for bedre plass */
-            padding: 30px; /* Mer luft inni boksen */
-            background: #fff;
-            border-radius: 10px; /* Mer avrundede hjørner */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Litt mykere skygge */
+            width: 350px; /* Litt bredere container */
+            padding: 30px; /* Mer padding inni containeren */
+            background: white;
+            border-radius: 12px; /* Mer avrundede hjørner */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Mykere skygge */
         }
         h2 {
-            color: #333;
+            color: #343a40; /* Mørkere overskrifter */
             margin-bottom: 20px;
             text-align: center;
         }
         input, button {
-            width: calc(100% - 20px); /* Tar hensyn til padding for å unngå overlapp */
-            padding: 12px; /* Litt mer padding inni feltene */
+            width: 100%;
+            padding: 12px; /* Litt mer padding i input og knapp */
             margin: 10px 0;
-            border: 1px solid #ddd; /* Litt lysere border */
+            border: 1px solid #ced4da; /* Lysere border */
             border-radius: 6px; /* Litt mer avrundede hjørner */
-            box-sizing: border-box; /* Viktig for å håndtere padding og border */
-            font-size: 16px; /* Litt større tekst */
+            box-sizing: border-box; /* Sikrer at padding ikke øker bredden */
         }
         input:focus {
-            border-color: #007bff; /* Fremhever border når aktiv */
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Liten skygge ved fokus */
-            outline: none; /* Fjerner standard fokus-outline */
+            border-color: #007bff; /* Fremhev border når aktiv */
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Lett skygge ved fokus */
+            outline: none; /* Fjern standard fokus-outline */
         }
         button {
             background-color: #007bff;
             color: white;
             border: none;
             cursor: pointer;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: background-color 0.3s ease; /* Myk overgang ved hover */
+            transition: background-color 0.2s ease-in-out; /* Myk overgang ved hover */
         }
         button:hover {
             background-color: #0056b3;
@@ -58,12 +55,8 @@
             display: none;
         }
         #balance-display {
-            font-size: 1.2em;
             font-weight: bold;
             color: #28a745; /* Grønn farge for saldo */
-            margin-top: 15px;
-            display: block; /* Sikrer at den tar opp hele bredden */
-            text-align: center; /* Sentrerer saldoen */
         }
         #user-display {
             font-weight: bold;
@@ -100,7 +93,33 @@
             <button onclick="logout()">Logg ut</button>
         </div>
     </div>
-
+    <body>
+        <div class="container">
+            <div id="register-section">
+                <h1>Registrer deg</h1>
+                <input type="text" id="register-username" placeholder="Brukernavn" required>
+                <input type="password" id="register-password" placeholder="Passord" required>
+                <button onclick="register()">Registrer</button>
+            </div>
+    
+            <div id="login-section" class="hidden">
+                <h1>Logg inn</h1>
+                <input type="text" id="login-username" placeholder="Brukernavn" required>
+                <input type="password" id="login-password" placeholder="Passord" required>
+                <button onclick="login()">Logg inn</button>
+            </div>
+    
+            <div id="bank-section" class="hidden">
+                <h1>Velkommen, <span id="user-display"></span></h1>
+                <p>Saldo: <span id="balance-display">0</span> kr</p>
+                <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
+                <button onclick="deposit()">Sett inn</button>
+                <button onclick="logout()">Logg ut</button>
+                <button onclick="switchUser()">Bytt bruker</button>
+            </div>
+        </div>
+        
+    </body>
     <script>
         // Registrer en ny bruker
         function register() {
