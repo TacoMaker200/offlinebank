@@ -69,7 +69,11 @@
         <!-- Registreringsseksjon -->
         <div id="register-section">
             <h2>Registrer deg</h2>
+            <!-- Input for brukernavn -->
+            <input type="text" id="register-username" placeholder="Brukernavn" required>
+            <!-- Input for kontonummer -->
             <input type="text" id="register-account-number" placeholder="Kontonummer (maks 11 sifre)" maxlength="11" required>
+            <!-- Input for passord -->
             <input type="password" id="register-password" placeholder="Passord" required>
             <button onclick="register()">Registrer</button>
             <button onclick="showSection('login-section')">Har du allerede en konto? Logg inn</button>
@@ -78,8 +82,8 @@
         <!-- Innloggingsseksjon -->
         <div id="login-section" class="hidden">
             <h2>Logg inn</h2>
+            <!-- Input for kontonummer -->
             <input type="text" id="login-account-number" placeholder="Kontonummer (maks 11 sifre)" maxlength="11" required>
-            <input type="password" id="login-password" placeholder="Passord" required>
             <button onclick="login()">Logg inn</button>
             <button onclick="showSection('register-section')">Har du ikke en konto? Registrer deg</button>
         </div>
@@ -97,28 +101,33 @@
     <script>
         // Registrer en ny bruker
         function register() {
+            const username = document.getElementById("register-username").value;
             const accountNumber = document.getElementById("register-account-number").value;
             const password = document.getElementById("register-password").value;
 
-            if (!accountNumber || !password) {
+            // Validerer at feltene ikke er tomme
+            if (!username || !accountNumber || !password) {
                 alert("Vennligst fyll ut alle felt.");
                 return;
             }
 
-            // Valider at kontonummeret er maksimalt 11 sifre
+            // Validerer at kontonummeret er maksimalt 11 sifre
             if (!/^\d{1,11}$/.test(accountNumber)) {
                 alert("Kontonummer må være maksimalt 11 sifre.");
                 return;
             }
 
+            // Henter eksisterende brukere fra localStorage
             const users = JSON.parse(localStorage.getItem("users")) || {};
 
+            // Sjekker om kontonummeret allerede er registrert
             if (users[accountNumber]) {
                 alert("Kontonummeret er allerede registrert.");
                 return;
             }
 
-            users[accountNumber] = { password: password, balance: 0 };
+            // Lagrer ny bruker i localStorage
+            users[accountNumber] = { username: username, password: password, balance: 0 };
             localStorage.setItem("users", JSON.stringify(users));
             alert("Registrering vellykket! Du kan nå logge inn.");
             showSection("login-section");
@@ -127,27 +136,30 @@
         // Logg inn en eksisterende bruker
         function login() {
             const accountNumber = document.getElementById("login-account-number").value;
-            const password = document.getElementById("login-password").value;
 
+            // Henter brukere fra localStorage
             const users = JSON.parse(localStorage.getItem("users")) || {};
 
-            if (!users[accountNumber] || users[accountNumber].password !== password) {
-                alert("Ugyldig kontonummer eller passord.");
+            // Validerer at kontonummeret finnes
+            if (!users[accountNumber]) {
+                alert("Ugyldig kontonummer.");
                 return;
             }
 
+            // Lagrer innlogget bruker i localStorage
             localStorage.setItem("currentUser", accountNumber);
             showSection("bank-section");
             updateBankUI();
         }
 
-        // Oppdater bankgrensesnittet
+        // Oppdater bankgrensesnittet med brukerens data
         function updateBankUI() {
             const accountNumber = localStorage.getItem("currentUser");
             const users = JSON.parse(localStorage.getItem("users"));
             const user = users[accountNumber];
 
-            document.getElementById("user-display").textContent = accountNumber;
+            // Viser brukernavn og saldo
+            document.getElementById("user-display").textContent = user.username;
             document.getElementById("balance-display").textContent = user.balance;
         }
 
