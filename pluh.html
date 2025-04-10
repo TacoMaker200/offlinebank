@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <title>Betalingsside</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    .product {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background-color: #f9f9f9;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .cart {
+      margin-top: 30px;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background-color: #eef;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .total {
+      font-size: 1.2em;
+      margin-top: 20px;
+      text-align: center;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #5c6bc0;
+      color: white;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #3949ab;
+    }
+    .remove-btn {
+      background-color: #e74c3c;
+      border-radius: 4px;
+      padding: 5px 10px;
+    }
+    .remove-btn:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Betalings side</h1>
+    <div class="product">
+      <input type="text" id="Mottaker" placeholder="Mottaker" required>
+      <input type="number" id="Penger" placeholder="Mengde penger">
+      <button onclick="addToCart()">Leggetil</button>
+    </div>
+
+    <div class="cart">
+      <h2>Log</h2>
+      <div id="cart-items"></div>
+      <div class="total">
+        <strong>Totale kostnader: </strong><span id="total-price">0</span> Kr
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    function updateCart() {
+      const cartItemsDiv = document.getElementById('cart-items');
+      const totalPriceDiv = document.getElementById('total-price');
+
+      cartItemsDiv.innerHTML = '';
+
+      let totalPrice = 0;
+      cart.forEach((item, index) => {
+        const cartItemDiv = document.createElement('div');
+        cartItemDiv.className = 'cart-item';
+        cartItemDiv.innerHTML = `
+          ${item.name} - ${item.price} Kr 
+          <button class="remove-btn" onclick="removeFromCart(${index})">Fjern</button>
+        `;
+        cartItemsDiv.appendChild(cartItemDiv);
+        totalPrice += item.price;
+      });
+
+      totalPriceDiv.textContent = totalPrice;
+    }
+
+    function addToCart() {
+      const mottaker = document.getElementById('Mottaker').value.trim();
+      const penger = parseFloat(document.getElementById('Penger').value);
+
+      if (!mottaker || isNaN(penger) || penger <= 0) {
+        alert("Vennligst fyll inn gyldig mottaker og beløp.");
+        return;
+      }
+
+      cart.push({ name: mottaker, price: penger });
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCart();
+
+      // Rydd feltene
+      document.getElementById('Mottaker').value = '';
+      document.getElementById('Penger').value = '';
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCart();
+    }
+
+    updateCart();
+  </script>
+</body>
+</html>
