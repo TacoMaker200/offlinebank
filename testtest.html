@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Bank</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Moderne skrifttype */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Sikrer at innholdet er sentrert selv om det er lite */
+            background-color: #f0f2f5; /* Litt mykere bakgrunnsfarge */
+        }
+        .container {
+            width: 350px; /* Litt bredere for bedre plass */
+            padding: 30px; /* Mer luft inni boksen */
+            background: #fff;
+            border-radius: 10px; /* Mer avrundede hjørner */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Litt mykere skygge */
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        input, button {
+            width: calc(100% - 20px); /* Tar hensyn til padding for å unngå overlapp */
+            padding: 12px; /* Litt mer padding inni feltene */
+            margin: 10px 0;
+            border: 1px solid #ddd; /* Litt lysere border */
+            border-radius: 6px; /* Litt mer avrundede hjørner */
+            box-sizing: border-box; /* Viktig for å håndtere padding og border */
+            font-size: 16px; /* Litt større tekst */
+        }
+        input:focus {
+            border-color: #007bff; /* Fremhever border når aktiv */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Liten skygge ved fokus */
+            outline: none; /* Fjerner standard fokus-outline */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: background-color 0.3s ease; /* Myk overgang ved hover */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        #balance-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745; /* Grønn farge for saldo */
+            margin-top: 15px;
+            display: block; /* Sikrer at den tar opp hele bredden */
+            text-align: center; /* Sentrerer saldoen */
+        }
+        #user-display {
+            font-weight: bold;
+            color: #007bff; /* Blå farge for brukernavn */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Registreringsseksjon -->
+        <div id="register-section">
+            <h2>Registrer deg</h2>
+            <input type="text" id="register-account-number" placeholder="Kontonummer (maks 11 sifre)" maxlength="11" required>
+            <input type="password" id="register-password" placeholder="Passord" required>
+            <button onclick="register()">Registrer</button>
+            <button onclick="showSection('login-section')">Har du allerede en konto? Logg inn</button>
+        </div>
+
+        <!-- Innloggingsseksjon -->
+        <div id="login-section" class="hidden">
+            <h2>Logg inn</h2>
+            <input type="text" id="login-account-number" placeholder="Kontonummer (maks 11 sifre)" maxlength="11" required>
+            <input type="password" id="login-password" placeholder="Passord" required>
+            <button onclick="login()">Logg inn</button>
+            <button onclick="showSection('register-section')">Har du ikke en konto? Registrer deg</button>
+        </div>
+
+        <!-- Bankseksjon -->
+        <div id="bank-section" class="hidden">
+            <h2>Velkommen, <span id="user-display"></span></h2>
+            <p>Saldo: <span id="balance-display">0</span> kr</p>
+            <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
+            <button onclick="deposit()">Sett inn</button>
+            <button onclick="logout()">Logg ut</button>
+        </div>
+    </div>
+
+    <script>
+        // Registrer en ny bruker
+        function register() {
+            const accountNumber = document.getElementById("register-account-number").value;
+            const password = document.getElementById("register-password").value;
+
+            if (!accountNumber || !password) {
+                alert("Vennligst fyll ut alle felt.");
+                return;
+            }
+
+            // Valider at kontonummeret er maksimalt 11 sifre
+            if (!/^\d{1,11}$/.test(accountNumber)) {
+                alert("Kontonummer må være maksimalt 11 sifre.");
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (users[accountNumber]) {
+                alert("Kontonummeret er allerede registrert.");
+                return;
+            }
+
+            users[accountNumber] = { password: password, balance: 0 };
+            localStorage.setItem("users", JSON.stringify(users));
+            alert("Registrering vellykket! Du kan nå logge inn.");
+            showSection("login-section");
+        }
+
+        // Logg inn en eksisterende bruker
+        function login() {
+            const accountNumber = document.getElementById("login-account-number").value;
+            const password = document.getElementById("login-password").value;
+
+            const users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (!users[accountNumber] || users[accountNumber].password !== password) {
+                alert("Ugyldig kontonummer eller passord.");
+                return;
+            }
+
+            localStorage.setItem("currentUser", accountNumber);
+            showSection("bank-section");
+            updateBankUI();
+        }
+
+        // Oppdater bankgrensesnittet
+        function updateBankUI() {
+            const accountNumber = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            const user = users[accountNumber];
+
+            document.getElementById("user-display").textContent = accountNumber;
+            document.getElementById("balance-display").textContent = user.balance;
+        }
+
+        // Sett inn penger
+        function deposit() {
+            const amount = parseFloat(document.getElementById("deposit-amount").value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("Vennligst skriv inn et gyldig beløp.");
+                return;
+            }
+
+            const accountNumber = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            users[accountNumber].balance += amount;
+            localStorage.setItem("users", JSON.stringify(users));
+            updateBankUI();
+            alert(`Du har satt inn ${amount} kr.`);
+        }
+
+        // Logg ut brukeren
+        function logout() {
+            localStorage.removeItem("currentUser");
+            showSection("login-section");
+        }
+
+        // Funksjon for å bytte seksjoner
+        function showSection(sectionId) {
+            document.querySelectorAll(".container > div").forEach(section => {
+                section.classList.add("hidden");
+            });
+            document.getElementById(sectionId).classList.remove("hidden");
+        }
+
+        // Sjekk om en bruker allerede er logget inn
+        window.onload = () => {
+            const currentUser = localStorage.getItem("currentUser");
+            if (currentUser) {
+                showSection("bank-section");
+                updateBankUI();
+            } else {
+                showSection("register-section");
+            }
+        };
+    </script>
+</body>
+</html>
