@@ -84,6 +84,8 @@
             <h2>Logg inn</h2>
             <!-- Input for kontonummer -->
             <input type="text" id="login-account-number" placeholder="Kontonummer (maks 11 sifre)" maxlength="11" required>
+            <!-- Input for passord -->
+            <input type="password" id="login-password" placeholder="Passord" required>
             <button onclick="login()">Logg inn</button>
             <button onclick="showSection('register-section')">Har du ikke en konto? Registrer deg</button>
         </div>
@@ -136,13 +138,14 @@
         // Logg inn en eksisterende bruker
         function login() {
             const accountNumber = document.getElementById("login-account-number").value;
+            const password = document.getElementById("login-password").value;
 
             // Henter brukere fra localStorage
             const users = JSON.parse(localStorage.getItem("users")) || {};
 
-            // Validerer at kontonummeret finnes
-            if (!users[accountNumber]) {
-                alert("Ugyldig kontonummer.");
+            // Validerer at kontonummeret og passordet stemmer
+            if (!users[accountNumber] || users[accountNumber].password !== password) {
+                alert("Ugyldig kontonummer eller passord.");
                 return;
             }
 
