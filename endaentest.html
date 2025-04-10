@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Bank</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Registreringsseksjon -->
+        <div id="register-section">
+            <h2>Registrer deg</h2>
+            <input type="text" id="register-account-number" placeholder="Kontonummer (11 sifre)" required>
+            <input type="password" id="register-password" placeholder="Passord" required>
+            <button onclick="register()">Registrer</button>
+        </div>
+
+        <!-- Innloggingsseksjon -->
+        <div id="login-section" class="hidden">
+            <h2>Logg inn</h2>
+            <input type="text" id="login-account-number" placeholder="Kontonummer (11 sifre)" required>
+            <input type="password" id="login-password" placeholder="Passord" required>
+            <button onclick="login()">Logg inn</button>
+        </div>
+
+        <!-- Bankseksjon -->
+        <div id="bank-section" class="hidden">
+            <h2>Velkommen, <span id="user-display"></span></h2>
+            <p>Saldo: <span id="balance-display">0</span> kr</p>
+            <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
+            <button onclick="deposit()">Sett inn</button>
+            <button onclick="logout()">Logg ut</button>
+            <button onclick="switchUser()">Bytt bruker</button>
+        </div>
+    </div>
+
+    <script>
+        // Registrer en ny bruker
+        function register() {
+            const accountNumber = document.getElementById("register-account-number").value;
+            const password = document.getElementById("register-password").value;
+
+            // Sjekk at kontonummer og passord er fylt ut
+            if (!accountNumber || !password) {
+                alert("Vennligst fyll ut alle felt.");
+                return;
+            }
+
+            // Valider at kontonummeret er nøyaktig 11 sifre
+            if (!/^\d{11}$/.test(accountNumber)) {
+                alert("Kontonummer må være nøyaktig 11 sifre.");
+                return;
+            }
+
+            // Hent eksisterende brukere fra localStorage
+            const users = JSON.parse(localStorage.getItem("users")) || {};
+
+            // Sjekk om kontonummeret allerede er registrert
+            if (users[accountNumber]) {
+                alert("Kontonummeret er allerede registrert.");
+                return;
+            }
+
+            // Legg til ny bruker i localStorage
+            users[accountNumber] = { password: password, balance: 0 };
+            localStorage.setItem("users", JSON.stringify(users));
+            alert("Registrering vellykket! Du kan nå logge inn.");
+            showSection("login-section");
+        }
+
+        // Logg inn en eksisterende bruker
+        function login() {
+            const accountNumber = document.getElementById("login-account-number").value;
+            const password = document.getElementById("login-password").value;
+
+            // Hent brukere fra localStorage
+            const users = JSON.parse(localStorage.getItem("users")) || {};
+
+            // Sjekk om kontonummer og passord er gyldige
+            if (!users[accountNumber] || users[accountNumber].password !== password) {
+                alert("Ugyldig kontonummer eller passord.");
+                return;
+            }
+
+            // Lagre innlogget bruker i localStorage
+            localStorage.setItem("currentUser", accountNumber);
+            showSection("bank-section");
+            updateBankUI();
+        }
+
+        // Oppdater bankgrensesnittet
+        function updateBankUI() {
+            const accountNumber = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            const user = users[accountNumber];
+
+            // Vis kontonummer og saldo
+            document.getElementById("user-display").textContent = accountNumber;
+            document.getElementById("balance-display").textContent = user.balance;
+        }
+
+        // Sett inn penger
+        function deposit() {
+            const amount = parseFloat(document.getElementById("deposit-amount").value);
+
+            // Sjekk at beløpet er gyldig
+            if (isNaN(amount) || amount <= 0) {
+                alert("Vennligst skriv inn et gyldig beløp.");
+                return;
+            }
+
+            // Oppdater saldoen til brukeren
+            const accountNumber = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            users[accountNumber].balance += amount;
+            localStorage.setItem("users", JSON.stringify(users));
+            updateBankUI();
+            alert(`Du har satt inn ${amount} kr.`);
+        }
+
+        // Logg ut brukeren
+        function logout() {
+            localStorage.removeItem("currentUser");
+            showSection("login-section");
+        }
+
+        // Bytt bruker
+        function switchUser() {
+            localStorage.removeItem("currentUser");
+            showSection("login-section");
+        }
+
+        // Forenklet funksjon for å bytte seksjoner
+        function showSection(sectionId) {
+            document.querySelectorAll(".container > div").forEach(section => {
+                section.classList.add("hidden");
+            });
+            document.getElementById(sectionId).classList.remove("hidden");
+        }
+
+        // Sjekk om en bruker allerede er logget inn
+        window.onload = () => {
+            const currentUser = localStorage.getItem("currentUser");
+            if (currentUser) {
+                showSection("bank-section");
+                updateBankUI();
+            } else {
+                showSection("register-section");
+            }
+        };
+    </script>
+</body>
+</html>
