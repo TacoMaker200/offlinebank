@@ -145,7 +145,7 @@
       <!-- Betaling -->
       <h2>Overfør penger</h2>
       <div class="product">
-        <input type="number" id="Mottaker" placeholder="Mottaker (11 sifre)">
+        <input type="text" id="Mottaker" placeholder="Mottaker (11 sifre)" maxlength=11 required>
         <input type="number" id="Penger" placeholder="Beløp">
         <button onclick="addToCart()">Betal</button>
       </div>
@@ -171,6 +171,8 @@
         alert("Vennligst fyll ut alle felt.");
         return;
       }
+
+
 
       if (!/^\d{11}$/.test(accountNumber)) {
         alert("Kontonummer må være 11 sifre.");
