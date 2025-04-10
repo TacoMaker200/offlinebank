@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Bank</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Ny skrifttype */
+            margin: 0;
+            padding: 20px; /* Litt padding rundt hele siden */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Bruker minste høyde for å sikre sentrering */
+            background-color: #e9ecef; /* Litt lysere bakgrunn */
+        }
+        .container {
+            width: 350px; /* Litt bredere container */
+            padding: 30px; /* Mer padding inni containeren */
+            background: white;
+            border-radius: 12px; /* Mer avrundede hjørner */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Mykere skygge */
+        }
+        h2 {
+            color: #343a40; /* Mørkere overskrifter */
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px; /* Litt mer padding i input og knapp */
+            margin: 10px 0;
+            border: 1px solid #ced4da; /* Lysere border */
+            border-radius: 6px; /* Litt mer avrundede hjørner */
+            box-sizing: border-box; /* Sikrer at padding ikke øker bredden */
+        }
+        input:focus {
+            border-color: #007bff; /* Fremhev border når aktiv */
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Lett skygge ved fokus */
+            outline: none; /* Fjern standard fokus-outline */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out; /* Myk overgang ved hover */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        #balance-display {
+            font-weight: bold;
+            color: #28a745; /* Grønn farge for saldo */
+        }
+        #user-display {
+            font-weight: bold;
+            color: #007bff; /* Blå farge for brukernavn */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="register-section">
+            <h1>Registrer deg</h1>
+            <input type="text" id="register-username" placeholder="Brukernavn" required>
+            <input type="password" id="register-password" placeholder="Passord" required>
+            <button onclick="register()">Registrer</button>
+        </div>
+
+        <div id="login-section" class="hidden">
+            <h1>Logg inn</h1>
+            <input type="text" id="login-username" placeholder="Brukernavn" required>
+            <input type="password" id="login-password" placeholder="Passord" required>
+            <button onclick="login()">Logg inn</button>
+        </div>
+
+        <div id="bank-section" class="hidden">
+            <h1>Velkommen, <span id="user-display"></span></h1>
+            <p>Saldo: <span id="balance-display">0</span> kr</p>
+            <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
+            <button onclick="deposit()">Sett inn</button>
+            <button onclick="logout()">Logg ut</button>
+            <button onclick="switchUser()">Bytt bruker</button>
+        </div>
+    </div>
+
+</body>
+    <script>
+        // Registrer en ny bruker
+        function register() {
+            const username = document.getElementById("register-username").value;
+            const password = document.getElementById("register-password").value;
+
+            // Sjekk at brukernavn og passord er fylt ut
+            if (!username || !password) {
+                alert("Vennligst fyll ut alle felt.");
+                return;
+            }
+
+            // Hent eksisterende brukere fra localStorage
+            const users = JSON.parse(localStorage.getItem("users")) || {};
+
+            // Sjekk om brukernavnet allerede er tatt
+            if (users[username]) {
+                alert("Brukernavn er allerede tatt.");
+                return;
+            }
+
+            // Legg til ny bruker i localStorage
+            users[username] = { password: password, balance: 0 };
+            localStorage.setItem("users", JSON.stringify(users));
+            alert("Registrering vellykket! Du kan nå logge inn.");
+            showSection("login-section");
+        }
+
+        // Logg inn en eksisterende bruker
+        function login() {
+            const username = document.getElementById("login-username").value;
+            const password = document.getElementById("login-password").value;
+
+            // Hent brukere fra localStorage
+            const users = JSON.parse(localStorage.getItem("users")) || {};
+
+            // Sjekk om brukernavn og passord er gyldige
+            if (!users[username] || users[username].password !== password) {
+                alert("Ugyldig brukernavn eller passord.");
+                return;
+            }
+
+            // Lagre innlogget bruker i localStorage
+            localStorage.setItem("currentUser", username);
+            showSection("bank-section");
+            updateBankUI();
+        }
+
+        // Oppdater bankgrensesnittet
+        function updateBankUI() {
+            const username = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            const user = users[username];
+
+            // Vis brukernavn og saldo
+            document.getElementById("user-display").textContent = username;
+            document.getElementById("balance-display").textContent = user.balance;
+        }
+
+        // Sett inn penger
+        function deposit() {
+            const amount = parseFloat(document.getElementById("deposit-amount").value);
+
+            // Sjekk at beløpet er gyldig
+            if (isNaN(amount) || amount <= 0) {
+                alert("Vennligst skriv inn et gyldig beløp.");
+                return;
+            }
+
+            // Oppdater saldoen til brukeren
+            const username = localStorage.getItem("currentUser");
+            const users = JSON.parse(localStorage.getItem("users"));
+            users[username].balance += amount;
+            localStorage.setItem("users", JSON.stringify(users));
+            updateBankUI();
+            alert(`Du har satt inn ${amount} kr.`);
+        }
+
+        // Logg ut brukeren
+        function logout() {
+            localStorage.removeItem("currentUser");
+            showSection("login-section");
+        }
+
+        // Bytt bruker
+        function switchUser() {
+            localStorage.removeItem("currentUser");
+            showSection("login-section");
+        }
+
+        // Vis en spesifikk seksjon
+        function showSection(sectionId) {
+            document.getElementById("register-section").classList.add("hidden");
+            document.getElementById("login-section").classList.add("hidden");
+            document.getElementById("bank-section").classList.add("hidden");
+            document.getElementById(sectionId).classList.remove("hidden");
+        }
+
+        // Sjekk om en bruker allerede er logget inn
+        window.onload = () => {
+            const currentUser = localStorage.getItem("currentUser");
+            if (currentUser) {
+                showSection("bank-section");
+                updateBankUI();
+            } else {
+                showSection("register-section");
+            }
+        };
+    </script>
+</body>
+</html>
