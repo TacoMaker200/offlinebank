@@ -94,15 +94,9 @@
         <div id="bank-section" class="hidden">
             <h2>Velkommen, <span id="user-display"></span></h2>
             <p>Saldo: <span id="balance-display">0</span> kr</p>
-            <input type="number" id="deposit-amount" placeholder="Beløp å sette inn">
+            <input type="number" id="transaction-amount" placeholder="Beløp">
             <button onclick="deposit()">Sett inn</button>
-            <button onclick="showWithdrawSection()">Ta ut penger</button>
-            <div id="withdraw-section" class="hidden">
-                <h3>Ta ut penger</h3>
-                <input type="number" id="withdraw-amount" placeholder="Beløp å ta ut">
-                <button onclick="withdraw()">Ta ut</button>
-                <button onclick="showSection('bank-section')">Tilbake</button>
-            </div>
+            <button onclick="withdraw()">Ta ut</button>
             <button onclick="logout()">Logg ut</button>
         </div>
     </div>
@@ -175,7 +169,8 @@
 
         // Sett inn penger
         function deposit() {
-            const amount = parseFloat(document.getElementById("deposit-amount").value);
+            const amountInput = document.getElementById("transaction-amount");
+            const amount = parseFloat(amountInput.value);
 
             if (isNaN(amount) || amount <= 0) {
                 alert("Vennligst skriv inn et gyldig beløp.");
@@ -190,30 +185,13 @@
             localStorage.setItem("users", JSON.stringify(users));
             updateBankUI();
             alert(`Du har satt inn ${amount} kr.`);
+            amountInput.value = ""; // Tøm inputfeltet etter transaksjonen
         }
 
-        // Logg ut brukeren
-        function logout() {
-            localStorage.removeItem("currentUser");
-            showSection("login-section");
-        }
-
-        // Funksjon for å bytte seksjoner
-        function showSection(sectionId) {
-            document.querySelectorAll(".container > div").forEach(section => {
-                section.classList.add("hidden");
-            });
-            document.getElementById(sectionId).classList.remove("hidden");
-        }
-
-        function showWithdrawSection() {
-            document.getElementById('withdraw-section').classList.remove('hidden');
-            document.getElementById('deposit-amount').classList.add('hidden');
-            // Fjern eventuelt de linjene som skjuler andre elementer hvis du vil ha dem synlige
-        }
         // Ta ut penger fra kontoen
         function withdraw() {
-            const amount = parseFloat(document.getElementById("withdraw-amount").value);
+            const amountInput = document.getElementById("transaction-amount");
+            const amount = parseFloat(amountInput.value);
 
             if (isNaN(amount) || amount <= 0) {
                 alert("Vennligst skriv inn et gyldig beløp.");
@@ -233,10 +211,21 @@
             localStorage.setItem("users", JSON.stringify(users));
             updateBankUI();
             alert(`Du har tatt ut ${amount} kr.`);
-            document.getElementById("withdraw-amount").value = ""; // Tøm inputfeltet etter uttak
-            document.getElementById('withdraw-section').classList.add('hidden'); // Skjuler uttaksdelen etterpå
-            document.getElementById('deposit-amount').classList.remove('hidden'); // Viser innskuddsfeltet igjen
-            // Vis eventuelt de andre skjulte elementene igjen her
+            amountInput.value = ""; // Tøm inputfeltet etter transaksjonen
+        }
+
+        // Logg ut brukeren
+        function logout() {
+            localStorage.removeItem("currentUser");
+            showSection("login-section");
+        }
+
+        // Funksjon for å bytte seksjoner
+        function showSection(sectionId) {
+            document.querySelectorAll(".container > div").forEach(section => {
+                section.classList.add("hidden");
+            });
+            document.getElementById(sectionId).classList.remove("hidden");
         }
 
         // Sjekk om en bruker allerede er logget inn
