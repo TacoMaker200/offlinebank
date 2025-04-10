@@ -62,48 +62,6 @@
             font-weight: bold;
             color: #007bff; /* Blå farge for brukernavn */
         }
-
-
-    body.dark-mode {
-        background-color: #1e1e1e; /* Mørk bakgrunn */
-        color: #f8f9fa; /* Lys tekstfarge */
-    }
-
-    .container.dark-mode {
-        background-color: #2c2c2c; /* Mørkere container */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Mørkere skygge */
-    }
-
-    h2.dark-mode {
-        color: #e9ecef; /* Lysere overskrift */
-    }
-
-    input.dark-mode, button.dark-mode {
-        background-color: #3a3a3a; /* Mørkere input og knapp */
-        color: #f8f9fa;
-        border-color: #555;
-    }
-
-    input.dark-mode:focus {
-        border-color: #66b0ff; /* Litt lysere fokusfarge */
-        box-shadow: 0 0 0 0.2rem rgba(102, 176, 255, 0.25);
-    }
-
-    button.dark-mode {
-        background-color: #3498db; /* Litt lysere blåfarge for knapp i mørk modus */
-    }
-
-    button.dark-mode:hover {
-        background-color: #236fa3;
-    }
-
-    #balance-display.dark-mode {
-        color: #98c379; /* Lysere grønn for saldo */
-    }
-
-    #user-display.dark-mode {
-        color: #61afef; /* Lysere blå for brukernavn */
-    }
     </style>
 </head>
 <body>
@@ -129,10 +87,10 @@
             <button onclick="deposit()">Sett inn</button>
             <button onclick="logout()">Logg ut</button>
             <button onclick="switchUser()">Bytt bruker</button>
-            <button id="toggle-dark-mode">Mørk modus</button>
         </div>
     </div>
 
+</body>
     <script>
         // Registrer en ny bruker
         function register() {
@@ -241,60 +199,6 @@
                 showSection("register-section");
             }
         };
-
-        const darkModeButton = document.getElementById("toggle-dark-mode");
-        const body = document.body;
-        const container = document.querySelector(".container");
-        const headings = document.querySelectorAll("h1, h2"); // Viktig: velg både h1 og h2
-        const inputs = document.querySelectorAll("input");
-        const buttons = document.querySelectorAll("button");
-        const balanceDisplay = document.getElementById("balance-display");
-        const userDisplay = document.getElementById("user-display");
-
-        // Funksjon for å aktivere/deaktivere mørk modus
-        function toggleDarkMode() {
-            body.classList.toggle("dark-mode");
-            container.classList.toggle("dark-mode");
-            headings.forEach(heading => heading.classList.toggle("dark-mode"));
-            inputs.forEach(input => input.classList.toggle("dark-mode"));
-            buttons.forEach(button => button.classList.toggle("dark-mode"));
-            if (balanceDisplay) balanceDisplay.classList.toggle("dark-mode");
-            if (userDisplay) userDisplay.classList.toggle("dark-mode");
-
-            // Lagre brukerens preferanse i localStorage
-            localStorage.setItem("darkMode", body.classList.contains("dark-mode"));
-
-            // Oppdater teksten på knappen
-            updateDarkModeButtonText();
-        }
-
-        // Funksjon for å oppdatere teksten på mørk modus-knappen
-        function updateDarkModeButtonText() {
-            if (body.classList.contains("dark-mode")) {
-                darkModeButton.textContent = "Lys modus";
-            } else {
-                darkModeButton.textContent = "Mørk modus";
-            }
-        }
-
-        // Sjekk om brukeren har foretrukket mørk modus tidligere
-        window.onload = () => {
-            const storedDarkMode = localStorage.getItem("darkMode");
-            if (storedDarkMode === "true") {
-                toggleDarkMode(); // Aktiver mørk modus ved lasting
-            }
-            updateDarkModeButtonText(); // Sett initial tekst på knappen
-            const currentUser = localStorage.getItem("currentUser");
-            if (currentUser) {
-                showSection("bank-section");
-                updateBankUI();
-            } else {
-                showSection("register-section");
-            }
-
-            darkModeButton.addEventListener("click", toggleDarkMode); // Lytt til klikk på knappen
-        };
-
     </script>
 </body>
 </html>
